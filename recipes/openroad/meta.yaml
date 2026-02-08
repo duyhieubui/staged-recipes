@@ -1,0 +1,106 @@
+# Note: there are many handy hints in comments in this example -- remove them when you've finalized your recipe
+# If your package is python based, we recommend using Grayskull to generate it instead:
+# https://github.com/conda-incubator/grayskull
+
+# Jinja variables help maintain the recipe as you'll update the version only here.
+{% set version = "2026.01.27.341650" %}
+
+{% set lemon_version = '1.3.1' %}
+{% set lemon_md5 = '1ff3c2d022168c82aa82a50d9d1ace73' %}
+{% set cudd_version = '3.0.0' %}
+{% set cudd_md5 = 'f81874f0fa8aac9905f0f4aed36ecd05' %}
+{% set or_tools_version = '9.11' %}
+{% set or_tools_md5 = '08cedd17bd148118439ff9f7d546ccaf' %}
+
+package:
+  name: openroad
+  version: {{ version }}
+
+source:
+  - git_url: https://github.com/The-OpenROAD-Project/OpenROAD.git
+    git_rev: 341650
+  - url: https://github.com/The-OpenROAD-Project/lemon-graph/archive/refs/tags/{{ lemon_version }}.tar.gz
+    md5: {{ lemon_md5 }}
+    folder: third_party/lemon
+  - url: https://github.com/The-OpenROAD-Project/cudd/archive/refs/tags/{{ cudd_version }}.tar.gz
+    md5: {{ cudd_md5 }}
+    folder: third_party/cudd
+  - url:     https://github.com/google/or-tools/archive/refs/tags/v{{ or_tools_version }}.tar.gz
+    md5: {{ or_tools_md5 }}
+    folder: third_party/or-tools
+
+build:
+  skip: True  # [win or osx]
+  number: 0
+
+requirements:
+  build:
+    # If your project compiles code (such as a C extension) then add the required compilers as separate entries here.
+    # Compilers are named 'c', 'cxx', 'fortran', among others
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+    # this is necessary for all compiled recipes
+    - {{ stdlib('c') }}
+    - make
+    - cmake >=3.30,<4
+    - swig 4.0.2
+    - bison
+    - flex
+    - {{ cdt('libx11-devel') }}          # [linux]
+    - {{ cdt('libxau-devel') }}          # [linux]
+    - {{ cdt('libxext-devel') }}         # [linux]
+    - {{ cdt('libxdamage-devel') }}      # [linux]
+    - {{ cdt('libxfixes-devel') }}       # [linux]
+    - {{ cdt('libxxf86vm-devel') }}      # [linux]
+    - {{ cdt('xorg-x11-proto-devel') }}  # [linux]
+    - {{ cdt('mesa-dri-drivers') }}      # [linux]
+    - {{ cdt('libselinux-devel') }}      # [linux]
+    - libxcb
+    - libgl-devel
+
+  host:
+    - yaml-cpp
+    - python 
+    - eigen 3.3.3
+    - spdlog
+    - tk
+    - zlib
+    - fmt
+    - libgomp                 # [not osx]
+    - llvm-openmp             # [osx]
+    - qt >=5.7,<6
+    - libxcb
+    - xcb-util-image
+    - xcb-util-keysyms
+    - xcb-util-renderutil
+    - xcb-util-wm
+    - libboost-devel 1.82
+  run:
+    - qt-main >=5.7,<6
+    - python
+    - spdlog
+    - yaml-cpp
+
+test:
+  commands:
+    - openroad -version
+    - sta -version
+
+about:
+  home: https://theopenroadproject.org/
+  summary: 'Open-Source Place-and-Route (PnR) and Static Timing Analysis (STA) tool suites for digital design'
+  description: |
+    OpenROAD is the leading open-source, foundational application for
+    semiconductor digital design. The OpenROAD flow delivers an
+    Autonomous, No-Human-In-Loop (NHIL) flow, 24 hour turnaround from
+    RTL-GDSII for rapid design exploration and physical design
+    implementation.
+  license: BSD-3-Clause
+  license_family: BSD
+  license_file: LICENSE
+  doc_url: https://openroad.readthedocs.io/
+  dev_url: https://github.com/The-OpenROAD-Project/OpenROAD
+
+extra:
+  recipe-maintainers:
+    - duyhieubui
